@@ -1,0 +1,304 @@
+html {
+    /* box-sizing: border-box; */
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+body {
+    /* box-sizing: border-box; */
+    background-color: #121212;
+    color: #E0E0E0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+#resolutionScalesCalculator {
+
+    /* padding-top: 2.5em; */
+    /* box-sizing: border-box; */
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    & > h1:first-child {
+        /* margin-top: -2em; */
+        position: relative;
+        display: inline;
+        height: 2.5em;
+    }
+    
+    & > section {
+        position: unset;
+        display: inline;
+    }
+    
+    & > section > header {
+        box-sizing: border-box;
+        position: relative;
+        display: inline;
+        height: 2.5em;
+        
+        padding: 0.0em;
+        border-radius: 0.25em 0.25em 0 0;
+        border: 0.125em solid #333;
+        border-color: rgba(0,0,0,1.0);
+
+        box-shadow: inset 0 0 1em 0 rgba(255,255,255,0.125);
+        
+        /* height: 1.5em; */
+        padding: 0.25em;
+        padding-left: 1em;
+        padding-right: 1em;
+        margin: 0.25em;
+        
+        & > a {
+            display: inline-block;
+            text-decoration: none;
+            color: unset;
+            background-color: rgba(0,0,0,0.1);
+            z-index: 1;
+            
+            &::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                z-index: 0; 
+            }
+        }
+    }
+    
+    & > section > main {
+        box-sizing: border-box;
+        position: absolute;
+        top: 2.4em;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1rem;
+        border-style: double;
+        border-width: 0.5rem;
+        border-color: #333;
+        border-radius: 10px;
+        overflow-x: auto;
+
+        background-color: rgba(0,0,0,0.1);
+    
+        min-width: fit-content;
+        margin: auto;
+    
+        display: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: fit-content;
+        height: fit-content;
+        margin: auto;
+        gap: 0.5rem;
+        /* position: relative; */
+
+
+    }
+
+    & > section:target {
+        & > header {
+            border-color: rgba(255,255,255,1);
+        }
+        & > main {
+            display: flex;
+        }
+    }
+
+    &:has(> section:hover):not(:has(> section:target:hover)) {
+        & > section:target {
+            & > main {
+                display: none;
+            }
+        }
+
+        & > section:hover {
+            & > header {
+                border-color: rgba(255,255,255,0.5);
+            }
+
+            & > main {
+                display: flex;
+            }
+        }
+    }
+
+    & article {
+        margin-top: 2rem;
+        padding: 1rem;
+        border-style: double;
+        border-width: 0.5rem;
+        border-color: #333;
+        border-radius: 10px;
+        overflow-x: auto;
+    
+        min-width: fit-content;
+        margin: auto;
+    
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: fit-content;
+        margin: auto;
+        gap: 0.5rem;
+        position: relative;
+    
+        padding-top: 3rem;
+    }
+
+    & article > h2 {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        background-color: #333;
+        color: #FFF;
+        padding: 0.5rem;
+        border-radius: 5px 5px 0 0;
+    }
+
+    & #resolutionTable {
+        min-width: 0;
+    
+        border-collapse: collapse;
+        table-layout: auto;
+        width: auto;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+}
+
+
+
+#resolutionScalings #resolutionTable .data-cell::before {
+    content: attr(data-dimensions);
+}
+
+#resolutionScalings:has(#togglePixelCount:checked) #resolutionTable .data-cell::before {
+    content: attr(data-pixels);
+}
+
+#resolutionScalings:has(#toggleNearestAlignedDimensions:checked) #resolutionTable .data-cell::before {
+    content: attr(data-nearest-aligned-dimensions);
+}
+
+#resolutionScalings:has(#toggleNearestAlignedPixelCount:checked) #resolutionTable .data-cell::before {
+    content: attr(data-nearest-aligned-pixel-count);
+}
+
+#resolutionScalings:has(#toggleNearestAlignedDimensionsError:checked) #resolutionTable .data-cell::before {
+    content: attr(data-alignment-error-dimensions);
+}
+
+#resolutionScalings:has(#toggleNearestAlignedPixelCountError:checked) #resolutionTable .data-cell::before {
+    content: attr(data-alignment-error-pixel-count);
+}
+
+
+#resolutionTable th, td {
+    border: 1px solid #333;
+    padding: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#resolutionTable th {
+    background-color: #222;
+    color: #FFF;
+    white-space: nowrap;
+    position: relative;
+}
+
+#resolutionTable th span {
+    display: block;
+    white-space: normal;
+}
+
+tr:nth-child(even) {
+    background-color: #1a1a1a;
+}
+
+tr:hover {
+    background-color: #2E2E2E;
+}
+
+.resolutionScalings .controls {
+    margin-bottom: 1rem;
+    background-color: #333;
+    padding: 0.5rem;
+    border-radius: 5px;
+    text-align: right;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    width: fit-content;
+}
+
+.resolutionScalings .controls label {
+    color: #FFF;
+    margin-right: 0.5rem;
+}
+
+.resolutionScalings #togglePixelCount {
+    vertical-align: middle;
+}
+
+.alignedResolutions table {
+    min-width: 0;
+    border-collapse: collapse;
+    table-layout: auto;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.alignedResolutions th,
+.alignedResolutions td {
+    border: 1px solid #333;
+    padding: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-color: #222;
+    color: #FFF;
+}
+
+.alignedResolutions tr:nth-child(even) {
+    background-color: #1a1a1a;
+}
+
+.alignedResolutions tr:hover {
+    background-color: #2E2E2E;
+}
+
+.alignedResolutions .controls {
+    margin-bottom: 1rem;
+    background-color: #333;
+    padding: 0.5rem;
+    border-radius: 5px;
+    text-align: right;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    width: fit-content;
+}
