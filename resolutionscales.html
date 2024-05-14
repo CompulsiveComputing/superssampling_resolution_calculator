@@ -6,17 +6,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Resolution Table</title>
-    <link rel="stylesheet" href="resolutionscales.css">
     <style>
-
+        
     </style>
-    <script src="fractionalpair.js"></script>
+    <script src="BigFractionDimensions.js"></script>
     <script src="resolutionscales.js"></script>
     <script>
         
     </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Resolution Table</title>
+    <style id="splash-css">
+
+        html:has(#splash-screen.active) {
+
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+
+            & > body {
+                margin: 0;
+                height: 100%;
+                overflow: hidden;
+            }
+        }
+
+        #splash-screen:not(.active) {
+            display: none;
+        }
+
+        body > #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            align-content: center;
+            justify-content: center;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+
+            & > div {
+                background-color: #010101;;
+            }
+        }
+
+        body > #splash-screen:before {
+            content: "";
+            background-color: #010101fa;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            align-content: center;
+            justify-content: center;
+            display: flex;
+            flex-direction: column;
+            /* animation: splashout 3s infinite; */
+            z-index: -1;
+        }
+
+        body > #splash-screen:not(:active) {
+            /* display: none; */
+        }
+
+        .circular-chart {
+            display: block;
+            margin: 10px auto;
+            max-width: 80%;
+            max-height: 250px;
+        }
+
+        .circle-bg {
+            stroke: #eee;
+        }
+
+        .circle {
+            animation: fillr 5s infinite, rotater 5s infinite;
+            animation-direction: alternate;
+            transform-origin: 50% 50%;
+        }
+
+        @keyframes splashout {
+            0% { opacity: 100%; }
+            100% { opacity: 0%; }
+        }
+
+        @keyframes rotater {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(3600deg); }
+        }
+
+        @keyframes fillr {
+            0% { stroke-dasharray: 5, 100; stroke-dashoffset: 0; stroke: #00aaff; }
+            10% { stroke-dasharray: 10, 100; stroke-dashoffset: 0; stroke: #00aaff; }
+            90% { stroke-dasharray: 95, 100; stroke-dashoffset: 0; stroke: #00aaff; }
+            100% { stroke-dasharray: 100, 100; stroke-dashoffset: 0; stroke: #00aaff; }
+        }
+
+
+    </style>
+    <link rel="stylesheet"  href="resolutionscales.css">
 </head>
 <body>
+    <div id="splash-screen" class="active">
+        <div>
+            <h1>Super-Sampling Aligned Resolution Calculator</h1>
+            <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg"
+                    d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#eee"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                />
+                <path class="circle"
+                    d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#00aaff"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-dasharray="100, 100"
+                    stroke-dashoffset="100"
+                />
+            </svg>
+        </div>
+    </div>
+    
     <article id="resolutionScalesCalculator">
         <h1>Super-Sampling Related Tabular Data V0.5</h1>
 
@@ -26,7 +158,7 @@
             </header>
             <main>
                 <h2>Extra Ratio Scale Table</h2>
-                <table class="ExtraRatioTable">
+                <table id="ExtraRatioTable">
                     <thead>
                         <tr>
                             <th>On/Off</th>
@@ -49,7 +181,7 @@
             </header>
             <main>
                 <h2>Quality Mode Scale Table</h2>
-                <table class="qualityTable">
+                <table id="qualityTable">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -71,32 +203,36 @@
             </header>
             <main>
                 <h2>Resolution Switchboard</h2>
-                <table class="groupSwitchboardTable">
-                    <thead>
-                        <tr>
-                            <th>Enable</th>
-                            <th>Group Name</th>
-                            <th>Resolution (W x H)</th>
-                            <th>Aspect Ratio</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Data rows added by JavaScript -->
-                    </tbody>
-                </table>
-                <table id="#individualSwitchboardTable">
-                    <thead>
-                        <tr>
-                            <th>Enable</th>
-                            <th>Resolution Name</th>
-                            <th>Resolution (W x H)</th>
-                            <th>Aspect Ratio</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Data rows added by JavaScript -->
-                    </tbody>
-                </table>
+                <div class="side_by_side">
+                    <table id="groupSwitchboardTable">
+                        <thead>
+                            <tr>
+                                <th>Enable</th>
+                                <th>Group Name</th>
+                                <th>Resolution (W x H)</th>
+                                <th>Aspect Ratio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data rows added by JavaScript -->
+                        </tbody>
+                    </table>
+                    <table id="individualSwitchboardTable">
+                        <thead>
+                            <tr>
+                                <th>Enable</th>
+                                <th>Standards Name</th>
+                                <th>Coloqial Name</th>
+                                <th>Resolution (W x H)</th>
+                                <th>Advertised Aspect Ratio</th>
+                                <th>Calculated Aspect Ratio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data rows added by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </main>
         </section>
             
@@ -106,39 +242,47 @@
             </header>
             <main>
                 <h2>Resolution & Quality Modes Table</h2>
-                <fieldset class="controls">
-                    <label for="toggleDimensions">Show Dimensions</label>
-                    <input type="radio" id="toggleDimensions" name="resolutionRadios">
-                
-                    <label for="togglePixelCount">Show Pixel Count</label>
-                    <input type="radio" id="togglePixelCount" name="resolutionRadios">
-                    
-                    <label for="toggleNearestAlignedDimensions">Show Nearest Aligned Dimensions</label>
-                    <input type="radio" id="toggleNearestAlignedDimensions" name="resolutionRadios">
-                
-                    <label for="toggleNearestAlignedPixelCount">Show Nearest Aligned Pixel Count</label>
-                    <input type="radio" id="toggleNearestAlignedPixelCount" name="resolutionRadios">
-                    
-                    <label for="toggleNearestAlignedDimensionsError">Show Nearest Aligned Dimensions Delta</label>
-                    <input type="radio" id="toggleNearestAlignedDimensionsError" name="resolutionRadios">
-                    
-                    <label for="toggleNearestAlignedPixelCountError">Show Nearest Aligned Pixel Count Delta</label>
-                    <input type="radio" id="toggleNearestAlignedPixelCountError" name="resolutionRadios">
-                </fieldset>
-                
-    
-    
-                <table id="resolutionTable">
-                    <thead>
-                        <tr>
-    
-                            <!-- Quality mode headings will be added here by JavaScript -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Table rows will be added here by JavaScript -->
-                    </tbody>
-                </table>
+                <section class="side_by_side">
+                    <aside>
+                        <fieldset class="controls">
+                            <label for="toggleDimensions">Show Dimensions</label>
+                            <input type="radio" id="toggleDimensions" name="resolutionRadios">
+                        
+                            <label for="togglePixelCount">Show Pixel Count</label>
+                            <input type="radio" id="togglePixelCount" name="resolutionRadios">
+                            
+                            <label for="toggleNearestAlignedDimensions">Show Nearest Aligned Dimensions</label>
+                            <input type="radio" id="toggleNearestAlignedDimensions" name="resolutionRadios">
+                        
+                            <label for="toggleNearestAlignedPixelCount">Show Nearest Aligned Pixel Count</label>
+                            <input type="radio" id="toggleNearestAlignedPixelCount" name="resolutionRadios">
+                            
+                            <label for="toggleNearestAlignedDimensionsError">Show Nearest Aligned Dimensions Delta</label>
+                            <input type="radio" id="toggleNearestAlignedDimensionsError" name="resolutionRadios">
+                            
+                            <label for="toggleNearestAlignedPixelCountError">Show Nearest Aligned Pixel Count Delta</label>
+                            <input type="radio" id="toggleNearestAlignedPixelCountError" name="resolutionRadios">
+                        </fieldset>
+                    </aside>
+                    <table id="resolutionTable">
+                        <caption>
+                            <h2>
+                                <span>FSR & DLSS Resolution Scaling</span>
+                                <span id="extra_ratio_caption"></span>
+                            </h2>
+                          </caption>
+                        <thead>
+                            <tr>
+        
+                                <!-- Quality mode headings will be added here by JavaScript -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Table rows will be added here by JavaScript -->
+                        </tbody>
+                    </table>
+                </section>
+
             </main>
         </section>
 
@@ -178,81 +322,114 @@
     <script>
     "use strict";
 
-    const initial_data = {
-        screen_db : {
-            wideScreen : [
-                new ResolutionData("720p, HD", "16:9", "1280x720"),
-                new ResolutionData("900p", "16:9", "1600x900"),
-                new ResolutionData("1080p, Full HD (FHD)", "16:9", "1920x1080"),
-                new ResolutionData("1440p, Quad HD (QHD)", "16:9", "2560x1440"),
-                new ResolutionData("1800p", "16:9", "3200x1800"),
-                new ResolutionData("2160p, 4K, Ultra HD (UHD)", "16:9", "3840x2160"),
-                new ResolutionData("4320p, 8K", "16:9", "7680x4320")
-            ],
-            wideScreenPro:[
-                new ResolutionData("WXGA", "16:10", "1280x800"),
-                new ResolutionData("WXGA+", "16:10", "1440x900"),
-                new ResolutionData("WSXGA+", "16:10", "1680x1050"),
-                new ResolutionData("WUXGA", "16:10", "1920x1200"),
-                new ResolutionData("WQXGA", "16:10", "2560x1600"),
-                new ResolutionData("WQUXGA", "16:10", "3840x2400")
-            ],
-            ultraWide:  [
-                new ResolutionData("WFHD, Ultra-Wide Full HD", "21:9", "2560x1080"),
-                new ResolutionData("WFHD+, Wide Full HD Plus", "24:10", "2880x1200"),
-                new ResolutionData("WQHD, Ultra-Wide Quad HD", "43:18", "3440x1440"),
-                new ResolutionData("WQHD+, Wide Quad HD Plus", "24:8", "3840x1600"),
-                new ResolutionData("UW4K, Ultra-Wide 4K", "24:10", "4320x1800"),
-                new ResolutionData("UW5K, Ultra-Wide 5K (WUHD)", "21:9", "5120x2160"),
-                new ResolutionData("UW5K+, Ultra-Wide 5K Plus", "12:5", "5760x2400"),
-                new ResolutionData("UW6K, Ultra-Wide 6K", "21:9", "6880x2880"),
-                new ResolutionData("UW7K, Ultra-Wide 7K", "21:9", "7680x3200"),
-                new ResolutionData("UW8K, Ultra-Wide 8K", "21:9", "8640x3600"),
-                new ResolutionData("UW-10K, Ultra-Wide 10K", "21:9", "10240x4320")
-            ],
-            full:[
-                new ResolutionData("XGA, Extended Graphics Array", "4:3", "1024x768"),
-                new ResolutionData("SXGA, Super XGA", "4:3", "1280x1024"),
-                new ResolutionData("SXGA+, Super XGA Plus", "4:3", "1400x1050"),
-                new ResolutionData("UXGA, Ultra XGA", "4:3", "1600x1200"),
-                new ResolutionData("QXGA, Quad XGA", "4:3", "2048x1536"),
-                new ResolutionData("QSXGA, Quad Super XGA", "4:3", "2560x2048"),
-                new ResolutionData("QUXGA, Quad Ultra XGA", "4:3", "3200x2400"),
-                new ResolutionData("HXGA, Hexadecatuple XGA", "4:3", "4096x3072"),
-                new ResolutionData("HSXGA, Hexadecatuple Super XGA", "4:3", "5120x4096"),
-                new ResolutionData("HUXGA, Hexadecatuple Ultra XGA", "4:3", "6400x4800")
-            ],
-            special:[
+    const NearestChoices = {
+        TRUE: 'closest',
+        BELOW: 'below',
+        ABOVE: 'above'
+    };
 
+    const initial_data = {
+        screen_db: {
+            wideScreen: [
+                new ResolutionData("WXGA, HD", "720p", "16:9", "1280x720"),
+                new ResolutionData("FWXGA", "", "16:9", "1366x768"),
+                new ResolutionData("HD+", "900p", "16:9", "1600x900"),
+                new ResolutionData("FHD", "1080p, Full HD", "16:9", "1920x1080"),
+                new ResolutionData("QHD", "1440p, Quad HD", "16:9", "2560x1440"),
+                new ResolutionData("QHD+", "1800p, Quad HD+", "16:9", "3200x1800"),
+                new ResolutionData("UHD", "2160p, 4K, Ultra HD (UHD)", "16:9", "3840x2160"),
+                new ResolutionData("UHD-2", "4320p, 8K", "16:9", "7680x4320")
+            ],
+            ultraWide: [
+                new ResolutionData("WFHD", "Ultra-Wide Full HD", "21:9", "2560x1080"),
+                new ResolutionData("WFHD+", "Wide Full HD Plus", "24:10", "2880x1200"),
+                new ResolutionData("WQHD", "Ultra-Wide Quad HD", "43:18", "3440x1440"),
+                new ResolutionData("WQHD+", "Wide Quad HD Plus", "24:8", "3840x1600"),
+                new ResolutionData("UW4K", "Ultra-Wide 4K", "24:10", "4320x1800"),
+                new ResolutionData("UW5K", "Ultra-Wide 5K (WUHD)", "21:9", "5120x2160"),
+                new ResolutionData("UW5K+", "Ultra-Wide 5K Plus", "12:5", "5760x2400"),
+                new ResolutionData("UW6K", "Ultra-Wide 6K", "21:9", "6880x2880"),
+                new ResolutionData("UW7K", "Ultra-Wide 7K", "21:9", "7680x3200"),
+                new ResolutionData("UW8K", "Ultra-Wide 8K", "21:9", "8640x3600"),
+                new ResolutionData("UW-10K", "Ultra-Wide 10K", "21:9", "10240x4320")
+            ],
+            wideScreenPro: [
+                new ResolutionData("WXGA", "", "16:10", "1280x800"),
+                new ResolutionData("WXGA+", "", "16:10", "1440x900"),
+                new ResolutionData("WSXGA+", "", "16:10", "1680x1050"),
+                new ResolutionData("WUXGA", "", "16:10", "1920x1200"),
+                new ResolutionData("WQXGA", "", "16:10", "2560x1600"),
+                new ResolutionData("WQXGA+", "", "16:10", "3200x1800"),
+                new ResolutionData("WQUXGA", "", "16:10", "3840x2400")
+            ],
+            full: [
+                new ResolutionData("XGA", "Extended Graphics Array", "4:3", "1024x768"),
+                new ResolutionData("SXGA", "Super XGA", "4:3", "1280x1024"),
+                new ResolutionData("SXGA+", "Super XGA Plus", "4:3", "1400x1050"),
+                new ResolutionData("UXGA", "Ultra XGA", "4:3", "1600x1200"),
+                new ResolutionData("QXGA", "Quad XGA", "4:3", "2048x1536"),
+                new ResolutionData("QSXGA", "Quad Super XGA", "4:3", "2560x2048"),
+                new ResolutionData("QUXGA", "Quad Ultra XGA", "4:3", "3200x2400"),
+                new ResolutionData("HXGA", "Hexadecatuple XGA", "4:3", "4096x3072"),
+                new ResolutionData("HSXGA", "Hexadecatuple Super XGA", "4:3", "5120x4096"),
+                new ResolutionData("HUXGA", "Hexadecatuple Ultra XGA", "4:3", "6400x4800")
+            ],
+            cinema: [
+                new ResolutionData("Digital Cinema 2x", "", "2.39:1", "2048 x 858"),
+                new ResolutionData("Digital Cinema 2x", "", "1.85:1", "1998 x 1080"),
+                new ResolutionData("Academy 2x", "", "1.37:1", "1828 x 1332"),
+                new ResolutionData("Full Aperture Native 2x", "", "1.32:1", "2048 x 1556"),
+                new ResolutionData("Digital Cinema 4x", "", "2.39:1", "4096 x 1714"),
+                new ResolutionData("Digital Cinema 4x", "", "1.85:1", "3996 x 2160"),
+                new ResolutionData("Digital Cinema Initiatives 4x (native resolution)", "", "1.90:1", "4096 x 2160"),
+                new ResolutionData("Academy 4x", "", "1.37:1", "3656 x 2664"),
+                new ResolutionData("Full Aperture 4x", "", "1.32:1", "4096 x 3112"),
+                new ResolutionData("6K", "", "1.94:1", "6144 x 3160"),
+                new ResolutionData("8K", "", "1.85:1", "7992 x 4320"),
+                new ResolutionData("7.2K", "", "2.35:1", "7200 x 3060"),
+                new ResolutionData("IMAX Digital", "", "1.37:1", "5616 x 4096")
+            ],
+            special: [
+                // Add special resolutions here if needed.
             ]
         },
+
         scalePairs : [
             { name: "Normal", xScale: 1, yScale: 1 },
             { name: "Half Height", xScale: 1, yScale: 2 },
             { name: "Half Width", xScale: 2, yScale: 1 },
             { name: "Half Height and Width", xScale: 2, yScale: 2 },
             { name: "Half Height and Quarter Width", xScale: 2, yScale: 4 },
+            { name: "Quarter Height and Half Width", xScale: 4, yScale: 2 },
             { name: "Quarter Height and Quarter Width", xScale: 4, yScale: 4 }
         ],
+
         qualityMultipliers: {
-            "Native": new FractionalPair("1.0", "1.0"),
-            "Ultra Quality": new FractionalPair("1.3", "1.3"),
-            "Quality": new FractionalPair("1.5", "1.5"),
-            "Balanced": new FractionalPair("1.7", "1.7"),
-            "Performance": new FractionalPair("2.0", "2.0"),
-            "Ultra Performance": new FractionalPair("3.0", "3.0")
+            "Native": new BigFractionDimensions("1.0", "1.0"),
+            "Ultra Quality": new BigFractionDimensions("1.3", "1.3"),
+            "Quality": new BigFractionDimensions("1.5", "1.5"),
+            "Balanced": new BigFractionDimensions("1.7", "1.7"),
+            "Performance": new BigFractionDimensions("2.0", "2.0"),
+            "Ultra Performance": new BigFractionDimensions("3.0", "3.0")
         }
     };
 
+    let nearestChoice = NearestChoices.TRUE;
+
     let resolutionGroupsEnableStatus = [];
 
-    let activeExtraRatioPair = {};
+    let activeExtraRatioPair = null;
 
     let activeResolutionData = {};
 
     let alignToWidth = 2;
     let alignToheight = 2;
-    let alignToPixelCount = 8;
+    let alignToPixelCount = 4;
+
+    let maxResWidth = 0;
+    let maxResHeight = 0;
+
+    let qualityMultipliers = {};
 
     let screenQualityResolutions = {};
 
@@ -260,23 +437,22 @@
 
     function updateResolutions(){
         populateIndividualResolutionSwitchboard();
-        calculateDerivedResolutions();
-        calculateAlignedDerivedResolutions();
         populateQualityModeScaleTable();
         populateQualityTable();
+        calculateAlignedResolutions();
+        populateAlignedResolutions();
+        populateNearestAlignedResolutions();
+        document.getElementById("splash-screen").className = "";
     }
 
     window.onload = () => {
+        // document.getElementById("splash-css").remove();
+        // document.getElementById("splash-screen").remove();
+
         BindAlignDOM();
         populateExtraRatioScaleTable();
         populateGroupResolutionSwitchboard();
-        populateIndividualResolutionSwitchboard();
-        calculateDerivedResolutions();
-        calculateAlignedDerivedResolutions();
-        populateQualityModeScaleTable();
-        populateQualityTable();
-        populateAlignedResolutions();
-        // populateNearestAlignedResolutions();
+        updateResolutions();
     };
 
     document.getElementById('calculateButton').addEventListener('click', ()=>{populateAlignedResolutions();populateNearestAlignedResolutions();});
