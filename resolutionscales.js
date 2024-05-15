@@ -476,8 +476,8 @@ function calculateAlignedResolutions() {
 
     // Iterate over activeResolutionData to find aspect ratios and maximum resolutions
     Object.values(activeResolutionData).forEach(resolutionData => {
-        const { aspectRatio, dimensions } = resolutionData;
-        const { simplifiedAspectRatio, extendedMaxResolution } = processAspectRatioAndMaxResolution(aspectRatio, dimensions);
+        const { derivedAspectRatio, dimensions } = resolutionData;
+        const { simplifiedAspectRatio, extendedMaxResolution } = processAspectRatioAndMaxResolution(derivedAspectRatio, dimensions);
 
         // Calculate aligned resolutions
         const alignedResolutionsForAspectRatio = getAlignedResolutions(simplifiedAspectRatio, extendedMaxResolution);
@@ -554,7 +554,7 @@ function populateNearestAlignedResolutions() {
     // Iterate over each resolution in the table to find the nearest aligned resolution
     Object.entries(screenQualityResolutions).forEach(([resKey, res]) => {
         const resolution = res.resolution;
-        const aspectRatio = resolution.aspectRatio.simplify().toRatioNotation();
+        const aspectRatio = resolution.dimensions.simplify().toRatioNotation();
         const alignedResolutionsForAspectRatio = alignedResolutions[aspectRatio];
 
         if (!alignedResolutionsForAspectRatio) {
@@ -567,8 +567,11 @@ function populateNearestAlignedResolutions() {
 
             const currentDimensions = new BigFractionDimensions(quality.scaledX, quality.scaledY);
 
-                    // Find the nearest aligned resolution
+            // Find the nearest aligned resolution
             const nearestAlignedResolution = findNearestAlignedResolution(currentDimensions, alignedResolutionsForAspectRatio);
+
+            if(!nearestAlignedResolution)
+                return;
 
             // Calculate alignment errors
             const alignmentErrorWidth = quality.scaledX.subtractF(nearestAlignedResolution.width).abs();
@@ -588,38 +591,79 @@ function populateNearestAlignedResolutions() {
 
     // Helper function to find the nearest aligned resolution
     function findNearestAlignedResolution(targetResolution, alignedResolutions) {
+        // Ensure the alignedResolutions array is sorted by their count
+        alignedResolutions.sort((a, b) => a.getCount().compareF(b.getCount()));
+
+        if(alignedResolutions.length == 0)
+            return;
+    
+        let left = 0;
+        let right = alignedResolutions.length - 1;
         let nearestResolution = alignedResolutions[0];
         let smallestDistance = distance(targetResolution, nearestResolution);
     
-        alignedResolutions.forEach(alignedResolution => {
-            const distance = targetResolution.getCount().subtractF(alignedResolution.getCount()).abs();
-            
-            if (nearestChoice === NearestChoices.TRUE) {
-                if (distance.less_thanF(smallestDistance)) {
-                    smallestDistance = distance;
-                    nearestResolution = alignedResolution;
-                }
-            } else if (nearestChoice === NearestChoices.BELOW) {
-                if (alignedResolution.getCount().less_thanF(targetResolution.getCount()) &&
-                    distance.less_thanF(smallestDistance)) {
-                    smallestDistance = distance;
-                    nearestResolution = alignedResolution;
-                }
-            } else if (nearestChoice === NearestChoices.ABOVE) {
-                if (alignedResolution.getCount().greater_thanF(targetResolution.getCount()) &&
-                    distance.less_thanF(smallestDistance)) {
-                    smallestDistance = distance;
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            const currentResolution = alignedResolutions[mid];
+            const currentDistance = distance(targetResolution, currentResolution);
+    
+            if (currentDistance.less_thanF(smallestDistance)) {
+                smallestDistance = currentDistance;
+                nearestResolution = currentResolution;
+            }
+    
+            if (currentResolution.getCount().less_thanF(targetResolution.getCount())) {
+                left = mid + 1;
+            } else if (currentResolution.getCount().greater_thanF(targetResolution.getCount())) {
+                right = mid - 1;
+            } else {
+                break;
+            }
+        }
+    
+        // After binary search, check the nearest points around the mid point
+        // to ensure the nearest resolution considering NearestChoices constraints
+        if (nearestChoice === NearestChoices.TRUE) {
+            for (let i = Math.max(0, left - 1); i <= Math.min(alignedResolutions.length - 1, right + 1); i++) {
+                const alignedResolution = alignedResolutions[i];
+                const currentDistance = distance(targetResolution, alignedResolution);
+                if (currentDistance.less_or_equal_toF(smallestDistance)) {
+                    smallestDistance = currentDistance;
                     nearestResolution = alignedResolution;
                 }
             }
-        });
+        } else if (nearestChoice === NearestChoices.BELOW) {
+            for (let i = Math.max(0, left - 1); i <= Math.min(alignedResolutions.length - 1, right + 1); i++) {
+                const alignedResolution = alignedResolutions[i];
+                if (alignedResolution.getCount().less_or_equal_toF(targetResolution.getCount())) {
+                    const currentDistance = distance(targetResolution, alignedResolution);
+                    if (currentDistance.less_thanF(smallestDistance)) {
+                        smallestDistance = currentDistance;
+                        nearestResolution = alignedResolution;
+                    }
+                }
+            }
+        } else if (nearestChoice === NearestChoices.ABOVE) {
+            for (let i = Math.max(0, left - 1); i <= Math.min(alignedResolutions.length - 1, right + 1); i++) {
+                const alignedResolution = alignedResolutions[i];
+                if (alignedResolution.getCount().greater_or_equal_toF(targetResolution.getCount())) {
+                    const currentDistance = distance(targetResolution, alignedResolution);
+                    if (currentDistance.less_thanF(smallestDistance)) {
+                        smallestDistance = currentDistance;
+                        nearestResolution = alignedResolution;
+                    }
+                }
+            }
+        }
     
         return nearestResolution;
-
-        function distance(a,b){
-            return  a.getCount().subtractF(b.getCount()).abs();
+    
+        function distance(a, b) {
+            return a.getCount().subtractF(b.getCount()).abs();
         }
     }
+    
+    
 }
 
 function findValidResolutions(aspectRatio, maxResolution, alignmentResolution, alignmentPixelCount) {

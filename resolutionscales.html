@@ -332,7 +332,6 @@
         screen_db: {
             wideScreen: [
                 new ResolutionData("WXGA, HD", "720p", "16:9", "1280x720"),
-                new ResolutionData("FWXGA", "", "16:9", "1366x768"),
                 new ResolutionData("HD+", "900p", "16:9", "1600x900"),
                 new ResolutionData("FHD", "1080p, Full HD", "16:9", "1920x1080"),
                 new ResolutionData("QHD", "1440p, Quad HD", "16:9", "2560x1440"),
@@ -390,6 +389,7 @@
                 new ResolutionData("IMAX Digital", "", "1.37:1", "5616 x 4096")
             ],
             special: [
+                new ResolutionData("FWXGA", "", "16:9", "1366x768"),
                 // Add special resolutions here if needed.
             ]
         },
@@ -414,7 +414,7 @@
         }
     };
 
-    let nearestChoice = NearestChoices.TRUE;
+    let nearestChoice = NearestChoices.BELOW;
 
     let resolutionGroupsEnableStatus = [];
 
@@ -424,7 +424,7 @@
 
     let alignToWidth = 2;
     let alignToheight = 2;
-    let alignToPixelCount = 4;
+    let alignToPixelCount = 64;
 
     let maxResWidth = 0;
     let maxResHeight = 0;
