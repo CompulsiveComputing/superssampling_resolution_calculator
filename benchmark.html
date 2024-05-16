@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLOP Benchmark, highly variable</title>
+    <title>FLOP Benchmark</title>
     <script src="bigfraction.js"></script>
     <script>
         class WrappedNumber {
@@ -135,11 +135,31 @@
             console.log("Benchmark suite completed");
         }
 
-        window.onload = runBenchmarkSuite;
+        function getBrowserName() {
+            const userAgent = navigator.userAgent;
+            if (userAgent.includes("Chrome")) {
+                return "Chrome";
+            } else if (userAgent.includes("Firefox")) {
+                return "Firefox";
+            } else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) {
+                return "Safari";
+            } else if (userAgent.includes("Edge")) {
+                return "Edge";
+            } else {
+                return "Unknown Browser";
+            }
+        }
+
+        window.onload = function() {
+            const browserName = getBrowserName();
+            document.title += ` - ${browserName}`;
+            document.getElementById('benchmark-title').textContent += ` (${browserName})`;
+            runBenchmarkSuite();
+        }
     </script>
 </head>
 <body>
-    <h1>FLOP Benchmark</h1>
+    <h1 id="benchmark-title">FLOP Benchmark</h1>
     <div id="results">
         <h2>Floating Point Operations</h2>
         <p id="float-addition"></p>
