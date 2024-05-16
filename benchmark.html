@@ -100,11 +100,11 @@
             const wrappedBenchmark = estimateOperations(targetTime, wrappedOp, wrappedA, wrappedB, wrappedResultArray, acceptableDeviation);
 
             document.getElementById(`float-${operationName}`).textContent = 
-                `Floating point ${operationName} performed ${floatBenchmark.count / targetTime} operations in 1 ms.`;
+                `Floating point ${operationName} performed ${(floatBenchmark.count / targetTime).toLocaleString()} operations in 1 ms.`;
             document.getElementById(`bigfraction-${operationName}`).textContent = 
-                `BigFraction ${operationName} performed ${fractionBenchmark.count / targetTime} operations in 1 ms.`;
+                `BigFraction ${operationName} performed ${(fractionBenchmark.count / targetTime).toLocaleString()} operations in 1 ms.`;
             document.getElementById(`wrappednumber-${operationName}`).textContent = 
-                `WrappedNumber ${operationName} performed ${wrappedBenchmark.count / targetTime} operations in 1 ms.`;
+                `WrappedNumber ${operationName} performed ${(wrappedBenchmark.count / targetTime).toLocaleString()} operations in 1 ms.`;
 
             console.log(`Benchmark end: ${operationName}`, { floatBenchmark, fractionBenchmark, wrappedBenchmark });
         }
