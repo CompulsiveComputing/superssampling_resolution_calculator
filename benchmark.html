@@ -3,41 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLOP Benchmark</title>
+    <title>FLOP Benchmark, highly variable</title>
     <script src="bigfraction.js"></script>
     <script>
+        // Function to generate an array of linearly spaced floats
         function generateLinearFloats(count, min = -1000, max = 1000) {
             const step = (max - min) / count;
-            const floats = [];
-            for (let i = 0; i < count; i++) {
+            return Array.from({ length: count }, (_, i) => {
                 let value = min + i * step;
-                if (value === 0) {
-                    value += step;  // Adjust value to avoid zero
-                }
-                floats.push(value);
-            }
-            return floats;
+                return value === 0 ? value + step : value;  // Adjust value to avoid zero
+            });
         }
 
+        // Function to convert an array of floats to BigFractions
         function generateBigFractions(floats) {
             return floats.map(f => BigFraction.from_float(f));
         }
 
-        const worker = new Worker('benchmarkworker.js');
+        // Function to benchmark a given operation
+        function benchmarkOperation(operation, arrayA, arrayB, resultArray, iterations) {
+            const start = performance.now();
+            const arrayLength = arrayA.length;
 
-        worker.onmessage = function(event) {
-            const { operationName, numOperationsFloat, numOperationsFraction } = event.data;
+            while (iterations > 0) {
+                const currentIterations = Math.min(iterations, arrayLength);
+                iterations -= currentIterations;
+
+                for (let i = 0; i < currentIterations; i++) {
+                    resultArray[i] = operation(arrayA[i], arrayB[i]);
+                }
+            }
+            const end = performance.now();
+            return end - start;
+        }
+
+        // Function to find the number of operations within a target time using binary search
+        function estimateOperations(targetTimeMs, operation, arrayA, arrayB, resultArray, acceptableDeviation) {
+            let low = 100;
+            let high = 10000;
+            let bestCount = low;
+            let lowTime = benchmarkOperation(operation, arrayA, arrayB, resultArray, low);
+            let highTime = benchmarkOperation(operation, arrayA, arrayB, resultArray, high);
+            
+            // Expand the range to find a suitable high value
+            while (highTime < targetTimeMs) {
+                highTime = benchmarkOperation(operation, arrayA, arrayB, resultArray, high);
+                low *= 2;
+                high *= 2;
+            }
+
+            // Binary search within the range [low, high]
+            while (high - low > (high * acceptableDeviation)) {
+                const mid = Math.floor((low + high) / 2);
+                const currentTime = benchmarkOperation(operation, arrayA, arrayB, resultArray, mid);
+
+                if (currentTime < targetTimeMs) {
+                    bestCount = mid;
+                    lowTime = currentTime;
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+
+            return { count: bestCount, timeMs: lowTime };
+        }
+
+        // Function to perform a benchmark for a specific operation
+        function performBenchmark(operationName, floatOp, fractionOp, arrayA, arrayB, fractionsA, fractionsB, targetTime, acceptableDeviation) {
+            console.log(`Benchmark start: ${operationName}`);
+            const floatResultArray = new Array(arrayA.length);
+            const fractionResultArray = new Array(arrayA.length);
+
+            const floatBenchmark = estimateOperations(targetTime, floatOp, arrayA, arrayB, floatResultArray, acceptableDeviation);
+            const fractionBenchmark = estimateOperations(targetTime, fractionOp, fractionsA, fractionsB, fractionResultArray, acceptableDeviation);
+
             document.getElementById(`float-${operationName}`).textContent = 
-                `Floating point ${operationName} took ${numOperationsFloat} operations in ${targetTime} ms with ${confidenceLevel * 100}% confidence`;
+                `Floating point ${operationName} performed ${floatBenchmark.count / targetTime} operations in 1 ms.`;
             document.getElementById(`bigfraction-${operationName}`).textContent = 
-                `BigFraction ${operationName} took ${numOperationsFraction} operations in ${targetTime} ms with ${confidenceLevel * 100}% confidence`;
-        };
+                `BigFraction ${operationName} performed ${fractionBenchmark.count / targetTime} operations in 1 ms.`;
 
+            console.log(`Benchmark end: ${operationName}`, { floatBenchmark, fractionBenchmark });
+        }
+
+        // Function to run the complete benchmark suite
         function runBenchmarkSuite() {
-            const sensitivity = 5;
-            const targetTime = 1;  // Target time in milliseconds
-            const confidenceLevel = 0.95; // 95% confidence level
-            const iterations = 10;
+            const targetTime = 50;  // Target time in milliseconds
+            const acceptableDeviation = 0.01; // 1% acceptable deviation for binary search precision
             const initialSize = 1_000_000;  // Initial size for arrays
 
             // Generate initial arrays
@@ -55,26 +107,14 @@
             ];
 
             // Perform benchmarks
-            for (const { name, floatOp, fractionOp } of operations) {
-                const workload = {
-                    operationName: name,
-                    floatOpStr: floatOp.toString(),
-                    fractionOpStr: fractionOp.toString(),
-                    arrayA,
-                    arrayB,
-                    fractionsA,
-                    fractionsB,
-                    targetTime,
-                    confidenceLevel,
-                    sensitivity,
-                    iterations
-                };
-                worker.postMessage(workload);
-            }
+            operations.forEach(({ name, floatOp, fractionOp }) => {
+                performBenchmark(name, floatOp, fractionOp, arrayA, arrayB, fractionsA, fractionsB, targetTime, acceptableDeviation);
+            });
 
             console.log("Benchmark suite completed");
         }
 
+        // Run the benchmark suite when the window loads
         window.onload = runBenchmarkSuite;
     </script>
 </head>
