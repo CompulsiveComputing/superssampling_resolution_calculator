@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLOP Benchmark</title>
+    <script src="bigfraction.js"></script>
+    <script>
+        function generateLinearFloats(count, min = -1000, max = 1000) {
+            const step = (max - min) / count;
+            const floats = [];
+            for (let i = 0; i < count; i++) {
+                let value = min + i * step;
+                if (value === 0) {
+                    value += step;  // Adjust value to avoid zero
+                }
+                floats.push(value);
+            }
+            return floats;
+        }
+
+        function generateBigFractions(floats) {
+            return floats.map(f => BigFraction.from_float(f));
+        }
+
+        const worker = new Worker('benchmarkworker.js');
+
+        worker.onmessage = function(event) {
+            const { operationName, numOperationsFloat, numOperationsFraction } = event.data;
+            document.getElementById(`float-${operationName}`).textContent = 
+                `Floating point ${operationName} took ${numOperationsFloat} operations in ${targetTime} ms with ${confidenceLevel * 100}% confidence`;
+            document.getElementById(`bigfraction-${operationName}`).textContent = 
+                `BigFraction ${operationName} took ${numOperationsFraction} operations in ${targetTime} ms with ${confidenceLevel * 100}% confidence`;
+        };
+
+        function runBenchmarkSuite() {
+            const sensitivity = 5;
+            const targetTime = 1;  // Target time in milliseconds
+            const confidenceLevel = 0.95; // 95% confidence level
+            const iterations = 10;
+            const initialSize = 1_000_000;  // Initial size for arrays
+
+            // Generate initial arrays
+            const arrayA = generateLinearFloats(initialSize, -10000000, 10000000);
+            const arrayB = generateLinearFloats(initialSize, -10000000, 10000000);
+            const fractionsA = generateBigFractions(arrayA);
+            const fractionsB = generateBigFractions(arrayB);
+
+            // Define operations
+            const operations = [
+                { name: "addition", floatOp: (a, b) => a + b, fractionOp: (a, b) => a.addF(b) },
+                { name: "subtraction", floatOp: (a, b) => a - b, fractionOp: (a, b) => a.subtractF(b) },
+                { name: "multiplication", floatOp: (a, b) => a * b, fractionOp: (a, b) => a.multiplyF(b) },
+                { name: "division", floatOp: (a, b) => a / b, fractionOp: (a, b) => a.divideF(b) }
+            ];
+
+            // Perform benchmarks
+            for (const { name, floatOp, fractionOp } of operations) {
+                const workload = {
+                    operationName: name,
+                    floatOpStr: floatOp.toString(),
+                    fractionOpStr: fractionOp.toString(),
+                    arrayA,
+                    arrayB,
+                    fractionsA,
+                    fractionsB,
+                    targetTime,
+                    confidenceLevel,
+                    sensitivity,
+                    iterations
+                };
+                worker.postMessage(workload);
+            }
+
+            console.log("Benchmark suite completed");
+        }
+
+        window.onload = runBenchmarkSuite;
+    </script>
+</head>
+<body>
+    <h1>FLOP Benchmark</h1>
+    <div id="results">
+        <h2>Floating Point Operations</h2>
+        <p id="float-addition"></p>
+        <p id="float-subtraction"></p>
+        <p id="float-multiplication"></p>
+        <p id="float-division"></p>
+        <h2>BigFraction Operations</h2>
+        <p id="bigfraction-addition"></p>
+        <p id="bigfraction-subtraction"></p>
+        <p id="bigfraction-multiplication"></p>
+        <p id="bigfraction-division"></p>
+    </div>
+</body>
+</html>
